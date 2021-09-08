@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  aws-ecr: circleci/aws-ecr@7.2.0
+
 jobs:
   ########### Build Heroes Service ###########
   build-heroes-service:
@@ -63,6 +66,25 @@ jobs:
             cd threats
             npm run lint
 
+
+########### Build & Push Hero Service Image ###########
+  publish-heroes-service-image:
+    - aws-ecr/build-and-push-image:
+        account-url: AWS_ECR_ACCOUNT_URL
+        aws-access-key-id: AWS_ACCESS_KEY_ID
+        aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+        #context: myContext
+        create-repo: true
+        dockerfile: Dockerfile.heroes
+        no-output-timeout: 20m
+        path: .
+        #profile-name: myProfileName
+        region: AWS_REGION
+        repo: uda-capstone
+        skip-when-tags-exist: false
+        tag: 'latest,myECRRepoTag'
+
+  
 workflows:
   default:
     jobs:
@@ -72,3 +94,5 @@ workflows:
           requires: [build-heroes-service]
       - lint-threats-service:
           requires: [build-threats-service]
+      - publish-heroes-service-image:
+          requires: [lint-heroes-service, lint-threats-service]
