@@ -3,34 +3,34 @@ version: 2.1
 jobs:
   ########### Build Heroes Service ###########
   build-heroes-service:
-  docker:
-    - image: circleci/node:13.8.0
-  steps:
-    - checkout
-    - restore_cache:
-        keys: [heroes-build]
-    - run:
-        name: Build Heroes Service
-        command: |
-          cd heroes
-          npm i
-    - save_cache:
-        paths: [heroes/node_modules]
-        key: heroes-build
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [heroes-build]
+      - run:
+          name: Build Heroes Service
+          command: |
+            cd heroes
+            npm i
+      - save_cache:
+          paths: [heroes/node_modules]
+          key: heroes-build
 
   ########### Test Backend & Frontend Jobs ###########
   lint-heroes:
-  docker:
-    - image: circleci/node:13.8.0
-  steps:
-    - checkout
-    - restore_cache:
-        keys: [heroes-build]
-    - run:
-        name: Lint Heroes Service
-        command: |
-          cd heroes
-          npm run lint
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [heroes-build]
+      - run:
+          name: Lint Heroes Service
+          command: |
+            cd heroes
+            npm run lint
 
 
 workflows:
