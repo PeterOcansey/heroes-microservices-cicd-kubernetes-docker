@@ -61,7 +61,7 @@ app.get('/powers', (req, res) => {
 
 app.post('/hero/**', (req, res) => {
   const heroId = parseInt(req.params[0], 10);
-  const foundHero = heroes.find(subject => subject.id === heroId);
+  const foundHero = heroes.find((subject) => subject.id === heroId);
 
   if (foundHero) {
     Object.keys(foundHero).forEach((attribute) => {
@@ -70,12 +70,6 @@ app.post('/hero/**', (req, res) => {
         console.log(`Set ${attribute} to ${req.body[attribute]} in hero: ${heroId}`);
       }
     });
-    // for (let attribute in foundHero) {
-    //     if (req.body[attribute]) {
-    //         foundHero[attribute] = req.body[attribute];
-    //         console.log(`Set ${attribute} to ${req.body[attribute]} in hero: ${heroId}`);
-    //     }
-    // }
     res.status(202).header({ Location: `http://localhost:${port}/hero/${foundHero.id}` }).send(foundHero);
   } else {
     console.log('Hero not found.');
