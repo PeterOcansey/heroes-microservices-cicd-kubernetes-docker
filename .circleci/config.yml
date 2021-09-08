@@ -32,7 +32,6 @@ jobs:
             cd heroes
             npm run lint
 
-
 workflows:
   default:
     jobs:
