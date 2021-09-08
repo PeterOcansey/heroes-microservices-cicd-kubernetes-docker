@@ -6,11 +6,11 @@ ENV NODE_ENV=production
 
 WORKDIR /app/heroes_service
 
-COPY ['package.json'] /app/heroes_service
+COPY . /app/heroes_service
 
 RUN npm install --production
 
-COPY . /app/heroes_service
+#COPY . /app/heroes_service
 
 EXPOSE 8081
 
