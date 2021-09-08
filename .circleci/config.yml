@@ -82,11 +82,12 @@ workflows:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
           #context: myContext
           create-repo: true
-          dockerfile: Dockerfile.heroes
+          dockerfile: Dockerfile
           no-output-timeout: 20m
-          path: .
+          path: ./heroes
           #profile-name: myProfileName
           region: AWS_REGION
           repo: uda-capstone
           skip-when-tags-exist: false
           tag: 'latest,myECRRepoTag'
+          requires: [lint-heroes-service, lint-threats-service]
