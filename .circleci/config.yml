@@ -18,8 +18,25 @@ jobs:
           paths: [heroes/node_modules]
           key: heroes-build
 
-  ########### Test Backend & Frontend Jobs ###########
-  lint-heroes:
+  ########### Build Threats Service ###########
+  build-threats-service:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [threats-build]
+      - run:
+          name: Build Threats Service
+          command: |
+            cd threats
+            npm i
+      - save_cache:
+          paths: [threats/node_modules]
+          key: threats-build
+
+  ########### Lint Heroes Service ###########
+  lint-heroes-service:
     docker:
       - image: circleci/node:13.8.0
     steps:
@@ -32,9 +49,26 @@ jobs:
             cd heroes
             npm run lint
 
+  ########### Lint Threats Service ###########
+  lint-threats-service:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [threats-build]
+      - run:
+          name: Lint Threats Service
+          command: |
+            cd threats
+            npm run lint
+
 workflows:
   default:
     jobs:
       - build-heroes-service
-      - lint-heroes:
+      - build-threats-service
+      - lint-heroes-service:
           requires: [build-heroes-service]
+      - lint-threats-service:
+          requires: [build-threats-service]
