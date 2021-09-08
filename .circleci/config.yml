@@ -87,7 +87,7 @@ workflows:
           path: ./heroes
           #profile-name: myProfileName
           region: AWS_REGION
-          repo: uda-capstone
+          repo: uda_capstone
           skip-when-tags-exist: false
           tag: 'latest,myECRRepoTag'
           requires: [lint-heroes-service, lint-threats-service]
