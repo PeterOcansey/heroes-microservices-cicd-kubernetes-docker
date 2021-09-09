@@ -112,18 +112,7 @@ jobs:
               --template-file .circleci/iac_files/eks.yml \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --region=us-west-2 \
-              --capabilities "CAPABILITY_NAMED_IAM" 
-      - destroy-eks:
-          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
-      - delete-ecr:
-          repo_to_delete: "heroes"
-          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
-  
-  deploy-services:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
+              --capabilities "CAPABILITY_NAMED_IAM"
       - run:
           name: Check status of EKS cluster
           command: |
@@ -138,34 +127,37 @@ jobs:
               --region us-west-2 update-kubeconfig \
               --name EKS
       - run:
-          name: Get cluster nodes
+          name: Get cluster endpoint
           command: |
-            kubectl get node
+            aws eks describe-cluster \
+            --region use-west-2 \
+            --name EKS \
+            --query "cluster.endpoint" \
+            --output text >>  .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-eks:
+          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+      - delete-ecr:
+          repo_to_delete: "heroes"
+          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+  
+  deploy-services:
+    docker:
+      - image: amazon/aws-cli
+    steps:
       - run:
-          name: Deploy Heroes Service
+          name: Deploy App
           command: |
-            kubectl run heroes-app \
-            --image="$AWS_ECR_ACCOUNT_URL/heroes/latest-$CIRCLE_BUILD_NUM" \
-            --restart=Never
-      - run:
-          name: Expose Load Balancer
-          command: |
-            kubectl expose pod heroes-app --type=LoadBalancer --port=8081
-      - run:
-          name: Get Load Balancer Status
-          command: |
-            kubectl get pod,svc -o wide
-      - run: 
-          name: Get Load Balancer DNS Name
-          command: |
-            EKS_ELB_HOSTNAME=$(kubectl get svc heroes-app -o jsonpath='{.status.loadBalancer.ingress[*].hostname}') \
-            && echo $EKS_ELB_HOSTNAME
+            cd /root/project/.circleci/ansible
+            ansible-playbook -i inventory.txt deploy-services.yml
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
           repo_to_delete: "heroes"
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}" 
-
 
 workflows:
   default:
