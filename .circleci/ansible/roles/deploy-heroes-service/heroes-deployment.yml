@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heroesservice-deployment
+spec:
+  selector:
+    matchLabels:
+      app: heroesservice
+  replicas: 1 # only have one replica as this microservice uses an in-memory backing database
+  template:
+    metadata:
+      labels:
+        app: heroesservice
+    spec:
+      containers:
+      - name: heroesservice
+        image: "${AWS_ECR_ACCOUNT_URL}/heroes/latest-${CIRCLE_BUILD_NUM}"
+        ports:
+        - containerPort: 8081

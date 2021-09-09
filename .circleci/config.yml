@@ -113,26 +113,59 @@ jobs:
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --region=us-west-2 \
               --capabilities "CAPABILITY_NAMED_IAM" 
-
+      - destroy-eks:
+          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+      - delete-ecr:
+          repo_to_delete: "heroes"
+          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+  
+  deploy-services:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
       - run:
           name: Check status of EKS cluster
           command: |
             aws eks --region us-west-2 describe-cluster \
               --name EKS \
               --query "cluster.status" \
-              --output text  
-      
+              --output text 
       - run:
           name: Test EKS cluster
           command: |
             aws eks \
               --region us-west-2 update-kubeconfig \
               --name EKS
+      - run:
+          name: Get cluster nodes
+          command: |
+            kubectl get node
+      - run:
+          name: Deploy Heroes Service
+          command: |
+            kubectl run heroes-app \
+            --image="$AWS_ECR_ACCOUNT_URL/heroes/latest-$CIRCLE_BUILD_NUM" \
+            --restart=Never
+      - run:
+          name: Expose Load Balancer
+          command: |
+            kubectl expose pod heroes-app --type=LoadBalancer --port=8081
+      - run:
+          name: Get Load Balancer Status
+          command: |
+            kubectl get pod,svc -o wide
+      - run: 
+          name: Get Load Balancer DNS Name
+          command: |
+            EKS_ELB_HOSTNAME=$(kubectl get svc heroes-app -o jsonpath='{.status.loadBalancer.ingress[*].hostname}') \
+            && echo $EKS_ELB_HOSTNAME
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
           repo_to_delete: "heroes"
-          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}" 
+
 
 workflows:
   default:
@@ -158,3 +191,5 @@ workflows:
           requires: [lint-heroes-service, lint-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
+      - deploy-services:
+          requires: [deploy-eks-infrastructure]
