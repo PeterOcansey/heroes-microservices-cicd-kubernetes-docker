@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
+  aws-cli: circleci/aws-cli@2.0.3
 
 
 commands:
@@ -104,6 +105,8 @@ jobs:
     steps:
       - checkout
       - run: pip install awscli
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -147,7 +150,7 @@ jobs:
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
-          repo_to_delete: "heroes"
+          repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
   
   deploy-services:
@@ -162,12 +165,11 @@ jobs:
       - run:
           name: Deploy App
           command: |
-            cd /root/project/.circleci/ansible
             ansible-playbook -i inventory.txt deploy-services.yml
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
-          repo_to_delete: "heroes"
+          repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}" 
 
 workflows:
