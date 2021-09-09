@@ -26,14 +26,7 @@ commands:
         when: on_fail
         command: |
           aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
-  delete-ecr:
-    description: Delete ecr container
-    steps:
-      - run:
-        name: Delete ecr container "<<parameters.ecr_repo>>"
-        when: on_fail
-        command: |
-          aws ecr batch-delete-image --repository-name "<<parameters.ecr_repo>>" --image-ids imageTag="<<parameters.ecr_image>>"
+
 
 
 jobs:
