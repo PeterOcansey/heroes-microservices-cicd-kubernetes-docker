@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Peter Ocansey | Capstone Infrastructure Deployment - This template provisions Capstone EKS infrastructure
+
+Parameters:
+  ID:
+    Description: Unique Identifier
+    Type: String
+
+
+Resources:
+
+  ################ Declare VPC ################ 
+  CapstoneEKSVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub eks-${ID}
+
+
+  ################ Declare InternetGateway ################
+  CapstoneEKSInternetGateway:
+      Type: AWS::EC2::InternetGateway
+      Properties:
+        Tags:
+          - Key: Name
+            Value: eks-${ID}
+
+
+  ################ Declare VPCGatewayAttachment ################
+  CapstoneEKSVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref CapstoneEKSInternetGateway
+      VpcId: !Ref CapstoneEKSVPC
+
+
+  ################ Declare RouteTable ################
+  CapstoneEKSPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CapstoneEKSVPC
+      Tags:
+        - Key: Name
+          Value: eks-${ID}
+
+
+  ################ Declare Route ################
+  CapstoneEKSPublicRoute:
+    DependsOn: CapstoneEKSVPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref CapstoneEKSPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref CapstoneEKSInternetGateway
+
+  
+  ################ Declare Subnet 1 ################
+  CapstoneEKSPublicSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-west-2a
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.0.0/24
+      VpcId:
+        Ref: CapstoneEKSVPC
+      Tags:
+        - Key: Name
+          Value: eks-PublicSubnet01-${ID}
+
+  
+ ################ Declare Subnet 2 ################
+  CapstoneEKSPublicSubnet02:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-west-2b
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.1.0/24
+      VpcId:
+        Ref: CapstoneEKSVPC
+      Tags:
+        - Key: Name
+          Value: eks-PublicSubnet02-${ID}
+
+  
+  ################ Declare SubnetRouteTableAssociation 1 ################
+  CapstoneEKSPublicSubnet01RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref CapstoneEKSPublicSubnet01
+      RouteTableId: !Ref CapstoneEKSPublicRouteTable
+
+
+  ################ Declare SubnetRouteTableAssociation 2 ################
+  CapstoneEKSPublicSubnet02RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref CapstoneEKSPublicSubnet02
+      RouteTableId: !Ref CapstoneEKSPublicRouteTable
+
+
+  ################ Declare SecurityGroup ################
+  CapstoneEKSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Cluster communication with worker nodes
+      VpcId: !Ref CapstoneEKSVPC
+      Tags:
+        - Key: Name
+          Value: eks-SecurityGroup-${ID}
+
+
+  ################ Declare Role ################
+  CapstoneEKSIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - eks.amazonaws.com
+            Action:
+            - 'sts:AssumeRole'
+      RoleName: EKSClusterRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+  
+
+  ################ Declare Cluster ################
+  CapstoneEKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: EKS
+      Version: 1.18
+      RoleArn:
+        "Fn::GetAtt": ["CapstoneEKSIAMRole", "Arn"]
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref CapstoneEKSSecurityGroup
+        SubnetIds:
+          - !Ref CapstoneEKSPublicSubnet01
+          - !Ref CapstoneEKSPublicSubnet02
+    DependsOn: [CapstoneEKSIAMRole, CapstoneEKSPublicSubnet01, CapstoneEKSPublicSubnet01, CapstoneEKSSecurityGroup]
+  
+
+  ################ Declare Node Instance Role ################
+  CapstoneEKSNodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+            - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Path: /
+  
+
+  ################ Declare NodeGroup ################
+  CapstoneEKSNodeGroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: EKS
+      NodeRole: 
+        "Fn::GetAtt": ["CapstoneEKSNodeInstanceRole", "Arn"]
+      AmiType: AL2_x86_64
+      InstanceTypes: 
+        - t3.medium
+      NodegroupName: NodeGroup01
+      RemoteAccess:
+        Ec2SshKey: WebEc2Key
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize: 2
+        MaxSize: 7
+      Labels:
+        Project: aws-eks
+      Subnets:
+        - !Ref CapstoneEKSPublicSubnet01
+        - !Ref CapstoneEKSPublicSubnet02
+    DependsOn: [CapstoneEKSCluster, CapstoneEKSNodeInstanceRole]
+
+  
+

@@ -3,6 +3,37 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
 
+
+commands:
+  destroy-eks:
+    description: Destroy eks cluster cloudformation stack
+    parameters:
+      stack_to_destroy:
+        type: string
+        default: "on_fail"
+    steps:
+      - run:
+        name: Destroy eks cluster "<<parameters.stack_to_destroy>>"
+        when: on_fail
+        command: |
+          aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
+  delete-container:
+    description: Delete ecr container
+    parameters:
+      repo_to_delete:
+        type: string
+        default: "on_fail"
+      tag_to_delete:
+        type: string
+        default: "on_fail"
+    steps:
+      - run:
+        name: Delete ecr container "<<parameters.repo_to_delete>>"
+        when: on_fail
+        command: |
+          aws ecr batch-delete-image --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
+
+
 jobs:
   ########### Build Heroes Service ###########
   build-heroes-service:
@@ -65,7 +96,42 @@ jobs:
           command: |
             cd threats
             npm run lint
+  
+  ########### Create and Deploy EKS Infrastructure ############
+  deploy-eks-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy EKS cluster
+          command: | 
+            aws cloudformation deploy \
+              --stack-name "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --template-file .circleci/iac_files/eks.yml \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --region=us-west-2 \
+              --capabilities "CAPABILITY_NAMED_IAM" 
+
+      - run:
+          name: Check status of EKS cluster
+          command: |
+            aws eks --region us-west-2 describe-cluster \
+              --name EKS \
+              --query "cluster.status" \
+              --output text  
       
+      - run:
+          name: Test EKS cluster
+          command: |
+            aws eks \
+              --region us-west-2 update-kubeconfig \
+              --name EKS
+      - destroy-eks:
+          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+      - delete-container:
+          repo_to_delete: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
+          tag_to_delete: "latest:$CIRCLE_BUILD_NUM"
 
 workflows:
   default:
@@ -80,14 +146,14 @@ workflows:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          #context: myContext
           create-repo: true
           dockerfile: Dockerfile
           no-output-timeout: 20m
           path: ./heroes
-          #profile-name: myProfileName
           region: AWS_REGION
-          repo: heroes
+          repo: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
           skip-when-tags-exist: false
-          tag: 'latest,myECRRepoTag'
+          tag: "latest:$CIRCLE_BUILD_NUM"
           requires: [lint-heroes-service, lint-threats-service]
+      - deploy-eks-infrastructure:
+          requires: [aws-ecr/build-and-push-image]
