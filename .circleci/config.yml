@@ -4,6 +4,15 @@ orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
 
 
+parameters:
+  ecr_repo:
+    type: string
+    default: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
+  ecr_image:
+    type: string
+    default: "latest:${CIRCLE_BUILD_NUM}"
+
+
 commands:
   destroy-eks:
     description: Destroy eks cluster cloudformation stack
@@ -19,19 +28,12 @@ commands:
           aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
   delete-ecr:
     description: Delete ecr container
-    parameters:
-      repo_to_delete:
-        type: string
-        default: "on_fail"
-      tag_to_delete:
-        type: string
-        default: "on_fail"
     steps:
       - run:
-        name: Delete ecr container "<<parameters.repo_to_delete>>"
+        name: Delete ecr container "<<parameters.ecr_repo>>"
         when: on_fail
         command: |
-          aws ecr batch-delete-image --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
+          aws ecr batch-delete-image --repository-name "<<parameters.ecr_repo>>" --image-ids imageTag="<<parameters.ecr_image>>"
 
 
 jobs:
@@ -129,9 +131,7 @@ jobs:
               --name EKS
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
-      - delete-ecr:
-          repo_to_delete: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
-          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+      - delete-ecr
 
 workflows:
   default:
