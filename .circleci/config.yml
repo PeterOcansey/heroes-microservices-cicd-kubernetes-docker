@@ -25,7 +25,7 @@ commands:
         name: Destroy eks cluster "<<parameters.stack_to_destroy>>"
         when: on_fail
         command: |
-          aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
+            aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
 
 
 
