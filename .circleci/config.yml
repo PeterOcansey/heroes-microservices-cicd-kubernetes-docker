@@ -130,7 +130,7 @@ jobs:
           name: Get cluster endpoint
           command: |
             aws eks describe-cluster \
-            --region use-west-2 \
+            --region us-west-2 \
             --name EKS \
             --query "cluster.endpoint" \
             --output text >>  .circleci/ansible/inventory.txt
