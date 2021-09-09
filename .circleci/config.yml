@@ -105,6 +105,7 @@ jobs:
       - checkout
       - run:
           name: Deploy EKS cluster
+          no_output_timeout: 30m
           command: | 
             aws cloudformation deploy \
               --stack-name "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}" \
@@ -130,7 +131,7 @@ jobs:
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
-          repo_to_delete: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
+          repo_to_delete: "heroes"
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
 
 workflows:
@@ -151,7 +152,7 @@ workflows:
           no-output-timeout: 20m
           path: ./heroes
           region: AWS_REGION
-          repo: "heroes-${CIRCLE_WORKFLOW_ID:0:7}"
+          repo: heroes
           skip-when-tags-exist: false
           tag: "latest-$CIRCLE_BUILD_NUM"
           requires: [lint-heroes-service, lint-threats-service]
