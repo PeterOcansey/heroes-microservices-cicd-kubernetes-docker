@@ -17,7 +17,7 @@ commands:
           name: Destroy eks cluster "<<parameters.stack_to_destroy>>"
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
+            aws cloudformation delete-stack --region us-west-2 --stack-name "<<parameters.stack_to_destroy>>"
   delete-ecr:
     description: Delete ecr container
     parameters:
@@ -32,7 +32,7 @@ commands:
           name: Delete ecr container "<<parameters.repo_to_delete>>"
           when: on_fail
           command: |
-            aws ecr batch-delete-image --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
+            aws ecr batch-delete-image --region us-west-2 --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
 
 
 jobs:
@@ -141,7 +141,7 @@ jobs:
             aws eks describe-cluster \
             --region us-west-2 \
             --name EKS \
-            --query "cluster.endpoint" \
+            --query "cluster.arn" \
             --output text >>  .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
