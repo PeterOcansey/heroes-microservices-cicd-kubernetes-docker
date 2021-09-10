@@ -157,6 +157,7 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
+      - checkout
       - run: pip install awscli
       - attach_workspace:
           at: ~/
@@ -167,7 +168,7 @@ jobs:
       - run:
           name: Deploy App
           command: |
-            ansible-playbook -i inventory.txt deploy-services.yml
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-services.yml
       - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
