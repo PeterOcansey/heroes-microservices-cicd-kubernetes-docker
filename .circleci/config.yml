@@ -159,10 +159,6 @@ jobs:
           name: set up environment
           command: |
             export KUBECONFIG=$HOME/.kube/config
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
