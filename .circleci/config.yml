@@ -176,7 +176,6 @@ jobs:
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: "<< pipeline.parameters.cluster_name >>"
           install-kubectl: true
-          kubconfig_file_path: /root/.kube/config
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
