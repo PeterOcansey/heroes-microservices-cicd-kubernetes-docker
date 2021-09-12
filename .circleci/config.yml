@@ -7,6 +7,24 @@ orbs:
   kubernetes: circleci/kubernetes@0.4.0
 
 
+parameters:
+  memstash_token:
+    type: string
+    default: "f56c43a6-ae90-4ee0-b313-06aaf504c7fc"
+  stack_name:
+    type: string
+    default: "capstone-eks-5543dr"   #"capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+  cluster_name:
+    type: string
+    default: EKS
+  default_region:
+    type: string
+    default: us-west-2
+  resources_id:
+    type: string
+    default: "5543dr"    #default: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
 commands:
   destroy-eks:
     description: Destroy eks cluster cloudformation stack
@@ -34,7 +52,7 @@ commands:
           name: Delete ecr container "<<parameters.repo_to_delete>>"
           when: on_fail
           command: |
-            aws ecr batch-delete-image --region us-west-2 --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
+            aws ecr batch-delete-image --region "<<parameters.default_region>>" --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
 
 
 jobs:
@@ -119,38 +137,34 @@ jobs:
           no_output_timeout: 30m
           command: | 
             aws cloudformation deploy \
-              --stack-name "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "<<parameters.stack_name>>" \
               --template-file .circleci/iac_files/eks.yml \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --region=us-west-2 \
+              --parameter-overrides ID="<<parameters.resources_id>>" \
+              --region="<<parameters.default_region>>" \
               --capabilities "CAPABILITY_NAMED_IAM"
       - run:
           name: Check status of EKS cluster
           command: |
-            aws eks --region us-west-2 describe-cluster \
-              --name EKS \
+            aws eks --region "<<parameters.default_region>>" describe-cluster \
+              --name "<<parameters.cluster_name>>" \
               --query "cluster.status" \
               --output text 
       - run:
           name: Test EKS cluster
           command: |
             aws eks \
-              --region us-west-2 update-kubeconfig \
-              --name EKS
+              --region "<<parameters.default_region>>" update-kubeconfig \
+              --name "<<parameters.cluster_name>>"
       - run:
-          name: Get cluster endpoint
+          name: set up environment
           command: |
-            aws eks describe-cluster \
-            --region us-west-2 \
-            --name EKS \
-            --query "cluster.arn" \
-            --output text >>  .circleci/ansible/inventory.txt
+            export KUBECONFIG=$HOME/.kube/config
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-eks:
-          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+          stack_to_destroy: "<<parameters.stack_name>>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
@@ -160,14 +174,15 @@ jobs:
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: EKS
+          cluster-name: "<<parameters.cluster_name>>"
           install-kubectl: true
+          kubconfig_file_path: /root/.kube/config
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
       - destroy-eks:
-          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+          stack_to_destroy: "<<parameters.stack_name>>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
@@ -177,7 +192,7 @@ jobs:
     steps:
       - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: EKS
+          cluster-name: "<<parameters.cluster_name>>"
       - run:
           name: Test cluster
           command: |
@@ -189,7 +204,7 @@ jobs:
             kubectl describe service heroes-service
             kubectl get services -o wide
       - destroy-eks:
-          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+          stack_to_destroy: "<<parameters.stack_name>>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
