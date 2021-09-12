@@ -137,24 +137,24 @@ jobs:
           no_output_timeout: 30m
           command: | 
             aws cloudformation deploy \
-              --stack-name "<<parameters.stack_name>>" \
+              --stack-name "<< pipeline.parameters.stack_name >>" \
               --template-file .circleci/iac_files/eks.yml \
-              --parameter-overrides ID="<<parameters.resources_id>>" \
-              --region="<<parameters.default_region>>" \
+              --parameter-overrides ID="<< pipeline.parameters.resources_id >>" \
+              --region="<< pipeline.parameters.default_region >>" \
               --capabilities "CAPABILITY_NAMED_IAM"
       - run:
           name: Check status of EKS cluster
           command: |
-            aws eks --region "<<parameters.default_region>>" describe-cluster \
-              --name "<<parameters.cluster_name>>" \
+            aws eks --region "<< pipeline.parameters.default_region >>" describe-cluster \
+              --name "<< pipeline.parameters.cluster_name >>" \
               --query "cluster.status" \
               --output text 
       - run:
           name: Test EKS cluster
           command: |
             aws eks \
-              --region "<<parameters.default_region>>" update-kubeconfig \
-              --name "<<parameters.cluster_name>>"
+              --region "<< pipeline.parameters.default_region >>" update-kubeconfig \
+              --name "<< pipeline.parameters.cluster_name >>"
       - run:
           name: set up environment
           command: |
@@ -164,7 +164,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-eks:
-          stack_to_destroy: "<<parameters.stack_name>>"
+          stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
@@ -174,7 +174,7 @@ jobs:
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: "<<parameters.cluster_name>>"
+          cluster-name: "<< pipeline.parameters.cluster_name >>"
           install-kubectl: true
           kubconfig_file_path: /root/.kube/config
       - kubernetes/create-or-update-resource:
@@ -182,7 +182,7 @@ jobs:
           resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
       - destroy-eks:
-          stack_to_destroy: "<<parameters.stack_name>>"
+          stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
@@ -192,7 +192,7 @@ jobs:
     steps:
       - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: "<<parameters.cluster_name>>"
+          cluster-name: "<< pipeline.parameters.cluster_name >>"
       - run:
           name: Test cluster
           command: |
@@ -204,7 +204,7 @@ jobs:
             kubectl describe service heroes-service
             kubectl get services -o wide
       - destroy-eks:
-          stack_to_destroy: "<<parameters.stack_name>>"
+          stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
