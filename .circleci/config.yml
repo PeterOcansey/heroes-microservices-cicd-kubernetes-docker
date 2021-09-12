@@ -157,11 +157,6 @@ jobs:
   
   deploy-services:
     executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          Name of the EKS cluster
-        type: string
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
@@ -179,11 +174,6 @@ jobs:
     
   test-deploy-service:
     executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          heroes-service
-        type: string
     steps:
       - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
