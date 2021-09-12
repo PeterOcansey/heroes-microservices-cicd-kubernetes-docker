@@ -52,7 +52,7 @@ commands:
           name: Delete ecr container "<<parameters.repo_to_delete>>"
           when: on_fail
           command: |
-            aws ecr batch-delete-image --region "<<parameters.default_region>>" --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
+            aws ecr batch-delete-image --region "<< pipeline.parameters.default_region >>" --repository-name "<<parameters.repo_to_delete>>" --image-ids imageTag="<<parameters.tag_to_delete>>"
 
 
 jobs:
