@@ -155,7 +155,7 @@ jobs:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
   
-  deploy-service:
+  deploy-services:
     executor: aws-eks/python3
     parameters:
       cluster-name:
