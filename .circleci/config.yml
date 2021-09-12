@@ -167,7 +167,7 @@ jobs:
           resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
       - destroy-eks:
-        stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
       - delete-ecr:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
@@ -188,6 +188,11 @@ jobs:
             kubectl get deployment
             kubectl describe service heroes-service
             kubectl get services -o wide
+      - destroy-eks:
+          stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+      - delete-ecr:
+          repo_to_delete: heroes
+          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
 
 
 workflows:
