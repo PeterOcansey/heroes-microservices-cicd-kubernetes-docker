@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: heroes-service
+  labels:
+    app: heroes-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: heroesservice
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heroes-service
+spec:
+  selector:
+    matchLabels:
+      app: heroes-service
+  replicas: 1 # only have one replica as this microservice uses an in-memory backing database
+  template:
+    metadata:
+      labels:
+        app: heroes-service
+    spec:
+      containers:
+      - name: heroes-service
+        image: "${AWS_ECR_ACCOUNT_URL}/heroes/latest-${CIRCLE_BUILD_NUM}"
+        ports:
+        - containerPort: 8081

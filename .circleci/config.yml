@@ -3,6 +3,8 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
   aws-cli: circleci/aws-cli@2.0.3
+  aws-eks: circleci/aws-eks@1.1.0
+  kubernetes: circleci/kubernetes@0.4.0
 
 
 commands:
@@ -153,27 +155,50 @@ jobs:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
   
-  deploy-services:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - run: pip install awscli
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible
-      - run:
-          name: Deploy App
-          command: |
-            ansible-playbook .circleci/ansible/deploy-services.yml
-      - destroy-eks:
+    deploy-service:
+      executor: aws-eks/python3
+      parameters:
+        cluster-name:
+          description: |
+            Name of the EKS cluster
+          type: string
+      steps:
+        - checkout
+        - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: EKS
+          install-kubectl: true
+        - kubernetes/create-or-update-resource:
+            get-rollout-status: true
+            resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
+            resource-name: deployment/heroes-service
+        - destroy-eks:
           stack_to_destroy: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
-      - delete-ecr:
-          repo_to_delete: heroes
-          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}" 
+        - delete-ecr:
+            repo_to_delete: heroes
+            tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+    
+    test-deploy-service:
+      executor: aws-eks/python3
+      parameters:
+        cluster-name:
+          description: |
+            heroes-service
+          type: string
+      steps:
+        - kubernetes/install
+        - aws-eks/update-kubeconfig-with-authenticator:
+            cluster-name: EKS
+        - run:
+            name: Test cluster
+            command: |
+              kubectl get svc
+              kubectl get pods
+              kubectl describe pods
+              kubectl get nodes
+              kubectl get deployment
+              kubectl describe service heroes-service
+              kubectl get services -o wide
+
 
 workflows:
   default:
@@ -201,3 +226,5 @@ workflows:
           requires: [aws-ecr/build-and-push-image]
       - deploy-services:
           requires: [deploy-eks-infrastructure]
+      - test-deploy-service:
+          requires: [deploy-services]
