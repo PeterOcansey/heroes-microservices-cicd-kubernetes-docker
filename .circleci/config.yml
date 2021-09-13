@@ -118,7 +118,7 @@ jobs:
             cd threats
             npm run lint
   
-  ########### Create and Deploy EKS Infrastructure ############
+  ########### Create and Deploy EKS Infrastructure ############ #
   deploy-eks-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
