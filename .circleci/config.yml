@@ -149,7 +149,7 @@ jobs:
               --name "<< pipeline.parameters.cluster_name >>" \
               --query "cluster.status" \
               --output text
-            - run:
+      - run:
           name: Test EKS cluster
           command: |
             aws eks \
