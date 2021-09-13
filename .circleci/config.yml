@@ -157,7 +157,7 @@ jobs:
               --name "<< pipeline.parameters.cluster_name >>"
       - run:
           name: Get the kubeconfig file
-          command: export KUBECONFIG=$HOME/.kube/kubeconfig && ~/bin/aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
+          command: export KUBECONFIG=$HOME/.kube/kubeconfig && aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
