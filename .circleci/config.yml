@@ -171,6 +171,11 @@ jobs:
           get-rollout-status: true
           resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
+      - destroy-eks:
+          stack_to_destroy: "<< pipeline.parameters.stack_name >>"
+      - delete-ecr:
+          repo_to_delete: heroes
+          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
     
   test-deploy-service:
     executor: aws-eks/python3
@@ -178,6 +183,9 @@ jobs:
       - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: "<< pipeline.parameters.cluster_name >>"
+          install-kubectl: true
+          kubeconfig-file-path: $HOME/.kube/kubeconfig
+          aws-region: "<< pipeline.parameters.default_region >>"
       - run:
           name: Test cluster
           command: |
