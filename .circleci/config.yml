@@ -148,7 +148,16 @@ jobs:
             aws eks --region "<< pipeline.parameters.default_region >>" describe-cluster \
               --name "<< pipeline.parameters.cluster_name >>" \
               --query "cluster.status" \
-              --output text 
+              --output text
+            - run:
+          name: Test EKS cluster
+          command: |
+            aws eks \
+              --region "<< pipeline.parameters.default_region >>" update-kubeconfig \
+              --name "<< pipeline.parameters.cluster_name >>"
+      - run:
+          name: Get the kubeconfig file
+          command: export KUBECONFIG=$HOME/.kube/kubeconfig && ~/bin/aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
@@ -159,15 +168,6 @@ jobs:
     executor: aws-eks/python3
     steps:
       - checkout
-      - run:
-          name: Test EKS cluster
-          command: |
-            aws eks \
-              --region "<< pipeline.parameters.default_region >>" update-kubeconfig \
-              --name "<< pipeline.parameters.cluster_name >>"
-      - run:
-          name: Get the kubeconfig file
-          command: export KUBECONFIG=$HOME/.kube/kubeconfig && ~/bin/aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>"
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: "<< pipeline.parameters.cluster_name >>"
           install-kubectl: true
