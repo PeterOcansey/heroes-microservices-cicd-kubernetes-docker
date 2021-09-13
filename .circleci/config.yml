@@ -4,7 +4,7 @@ orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
   aws-cli: circleci/aws-cli@2.0.3
   aws-eks: circleci/aws-eks@1.1.0
-  kubernetes: circleci/kubernetes@0.4.0
+  kubernetes: circleci/kubernetes@0.11.2
 
 
 parameters:
@@ -156,9 +156,10 @@ jobs:
               --region "<< pipeline.parameters.default_region >>" update-kubeconfig \
               --name "<< pipeline.parameters.cluster_name >>"
       - run:
-          name: set up environment
-          command: |
-            export KUBECONFIG=$HOME/.kube/config
+          name: Configure kubectl
+          shell: /bin/bash -eo pipefail
+          environment:
+            KUBECONFIG: /root/.kube/config
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
