@@ -176,6 +176,7 @@ jobs:
           resource-file-path: /home/circleci/project/.circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
           show-kubectl-command: true
+          no_output_timeout: 30m
       - run:
           name: Test cluster
           command: |
