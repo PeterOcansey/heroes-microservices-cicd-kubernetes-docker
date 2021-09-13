@@ -39,8 +39,8 @@ spec:
           name: heroes-service
           ports:
             - containerPort: 8081
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+  #strategy:
+   # rollingUpdate:
+   #   maxSurge: 25%
+   #   maxUnavailable: 25%
+   # type: RollingUpdate
