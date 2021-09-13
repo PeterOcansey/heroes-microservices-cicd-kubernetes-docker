@@ -151,7 +151,9 @@ jobs:
               --output text
       - run:
           name: Get the kubeconfig file
-          command: export KUBECONFIG=$HOME/.kube/kubeconfig && aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
+          command: |
+            echo $HOME
+            export KUBECONFIG=$HOME/.kube/kubeconfig && aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
@@ -169,7 +171,7 @@ jobs:
           aws-region: "<< pipeline.parameters.default_region >>"
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
-          resource-file-path: .circleci/kub_deploy_files/heroes-service-deployment.yml
+          resource-file-path: kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
