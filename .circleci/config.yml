@@ -173,6 +173,7 @@ jobs:
           get-rollout-status: true
           resource-file-path: /home/circleci/project/.circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
+          show-kubectl-command: true
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
@@ -229,7 +230,8 @@ workflows:
           requires: [lint-heroes-service, lint-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
-      - deploy-services:
-          requires: [deploy-eks-infrastructure]
       - test-deploy-service:
-          requires: [deploy-services]
+          requires: [deploy-eks-infrastructure]
+      #- deploy-services:
+      #    requires: [deploy-eks-infrastructure]
+
