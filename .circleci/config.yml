@@ -155,11 +155,6 @@ jobs:
             aws eks \
               --region "<< pipeline.parameters.default_region >>" update-kubeconfig \
               --name "<< pipeline.parameters.cluster_name >>"
-      - run:
-          name: Configure kubectl
-          shell: /bin/bash -eo pipefail
-          environment:
-            KUBECONFIG: /root/.kube/config
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
