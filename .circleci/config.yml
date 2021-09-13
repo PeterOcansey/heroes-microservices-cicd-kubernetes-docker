@@ -13,7 +13,7 @@ parameters:
     default: "f56c43a6-ae90-4ee0-b313-06aaf504c7fc"
   stack_name:
     type: string
-    default: "capstone-eks-5543dr"   #"capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
+    default: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
   cluster_name:
     type: string
     default: EKS
@@ -22,7 +22,7 @@ parameters:
     default: us-west-2
   resources_id:
     type: string
-    default: "5543dr"    #default: "${CIRCLE_WORKFLOW_ID:0:7}"
+    default: "${CIRCLE_WORKFLOW_ID:0:7}"
 
 
 commands:
