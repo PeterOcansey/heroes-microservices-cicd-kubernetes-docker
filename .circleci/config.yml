@@ -149,11 +149,6 @@ jobs:
               --name "<< pipeline.parameters.cluster_name >>" \
               --query "cluster.status" \
               --output text
-      - run:
-          name: Get the kubeconfig file
-          command: |
-            echo $HOME
-            export KUBECONFIG=$HOME/.kube/config && aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
@@ -164,6 +159,13 @@ jobs:
     executor: aws-eks/python3
     steps:
       - checkout
+      - run: pip install awscli
+      - run:
+          name: Get the kubeconfig file
+          command: |
+            echo $HOME
+            export KUBECONFIG=$HOME/.kube/config && aws eks --region "<< pipeline.parameters.default_region >>" update-kubeconfig --name "<< pipeline.parameters.cluster_name >>" 
+      - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: "<< pipeline.parameters.cluster_name >>"
           install-kubectl: true
@@ -237,8 +239,8 @@ workflows:
           requires: [lint-heroes-service, lint-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
-      - test-deploy-service:
+      - deploy-services:
           requires: [deploy-eks-infrastructure]
-      #- deploy-services:
-      #    requires: [deploy-eks-infrastructure]
+      - test-deploy-service:
+          requires: [deploy-services]
 
