@@ -192,7 +192,7 @@ jobs:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:
           repo_to_delete: heroes
-          tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
+          tag_to_delete: "latest"
 
 
 workflows:
@@ -215,7 +215,7 @@ workflows:
           region: AWS_REGION
           repo: heroes
           skip-when-tags-exist: false
-          tag: "latest-$CIRCLE_BUILD_NUM"
+          tag: "latest"
           requires: [lint-heroes-service, lint-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
