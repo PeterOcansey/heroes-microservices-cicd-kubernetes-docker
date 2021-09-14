@@ -34,7 +34,7 @@ spec:
         app: heroes-service
     spec:
       containers:
-        - image: ${AWS_ECR_ACCOUNT_URL}/heroes/latest-${CIRCLE_BUILD_NUM}
+        - image: https://338416168655.dkr.ecr.us-west-2.amazonaws.com/heroes:latest-$CIRCLE_BUILD_NUM
           imagePullPolicy: Always
           name: heroes-service
           ports:
