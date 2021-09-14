@@ -172,11 +172,11 @@ jobs:
           kubeconfig-file-path: $HOME/.kube/config
           aws-region: "<< pipeline.parameters.default_region >>"
       - kubernetes/create-or-update-resource:
-          get-rollout-status: true
+          get-rollout-status: false
           resource-file-path: /home/circleci/project/.circleci/kub_deploy_files/heroes-service-deployment.yml
           resource-name: deployment/heroes-service
           show-kubectl-command: true
-          watch-rollout-status: true
+          watch-rollout-status: false
           watch-timeout: 20m
       - run:
           name: Test cluster
