@@ -223,7 +223,7 @@ jobs:
                --request GET https://api.memstash.io/values/capstone_hero_oldstack)
             echo $OLD_STACK
             if $OLD_STACK | grep "capstone-eks"; then
-              aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "${OLD_STACK}"
+              aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name $OLD_STACK
             fi
       - run:
           name: Update memestash with new stack
