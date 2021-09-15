@@ -209,9 +209,9 @@ workflows:
       - lint-heroes-service
       - lint-threats-service
       - build-heroes-service:
-          requires: lint-heroes-service
+          requires: [lint-heroes-service]
       - build-threats-service:
-          requires: lint-threats-service
+          requires: [lint-threats-service]
       - aws-ecr/build-and-push-image:
           name: HeroImage
           account-url: AWS_ECR_ACCOUNT_URL
@@ -239,9 +239,9 @@ workflows:
           skip-when-tags-exist: false
           tag: "latest"
       - build-heroes-image:
-          requires: build-heroes-service
+          requires: [build-heroes-service]
       - build-threats-image:
-          requires: build-threats-service
+          requires: [build-threats-service]
       - deploy-eks-infrastructure:
           requires: [HeroImage, ThreatImage]
       - deploy-services:
