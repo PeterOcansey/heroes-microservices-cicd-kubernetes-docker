@@ -213,35 +213,35 @@ workflows:
       - build-threats-service:
           requires: [lint-threats-service]
       - build-heroes-image:
-        steps: 
-          - aws-ecr/build-and-push-image:
-              account-url: AWS_ECR_ACCOUNT_URL
-              aws-access-key-id: AWS_ACCESS_KEY_ID
-              aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-              create-repo: true
-              dockerfile: Dockerfile
-              no-output-timeout: 20m
-              path: ./heroes
-              region: AWS_REGION
-              repo: heroes
-              skip-when-tags-exist: false
-              tag: "latest"
-              requires: [build-heroes-service]
+          steps: 
+            - aws-ecr/build-and-push-image:
+                account-url: AWS_ECR_ACCOUNT_URL
+                aws-access-key-id: AWS_ACCESS_KEY_ID
+                aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+                create-repo: true
+                dockerfile: Dockerfile
+                no-output-timeout: 20m
+                path: ./heroes
+                region: AWS_REGION
+                repo: heroes
+                skip-when-tags-exist: false
+                tag: "latest"
+                requires: [build-heroes-service]
       - build-threats-image:
-        steps:
-          - aws-ecr/build-and-push-image:
-              account-url: AWS_ECR_ACCOUNT_URL
-              aws-access-key-id: AWS_ACCESS_KEY_ID
-              aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-              create-repo: true
-              dockerfile: Dockerfile
-              no-output-timeout: 20m
-              path: ./threats
-              region: AWS_REGION
-              repo: threats
-              skip-when-tags-exist: false
-              tag: "latest"
-              requires: [build-threats-service]
+          steps:
+            - aws-ecr/build-and-push-image:
+                account-url: AWS_ECR_ACCOUNT_URL
+                aws-access-key-id: AWS_ACCESS_KEY_ID
+                aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+                create-repo: true
+                dockerfile: Dockerfile
+                no-output-timeout: 20m
+                path: ./threats
+                region: AWS_REGION
+                repo: threats
+                skip-when-tags-exist: false
+                tag: "latest"
+                requires: [build-threats-service]
 
       - deploy-eks-infrastructure:
           requires: [build-heroes-image, build-threats-image]
