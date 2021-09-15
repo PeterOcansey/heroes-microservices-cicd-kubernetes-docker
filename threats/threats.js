@@ -3,9 +3,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const request = require('request');
 const swaggerUi = require('swagger-ui-express');
-swaggerDocument = require('./swagger.json');
+const swaggerDocument = require('./swagger.json');
 
-const port = 8082; //process.argv.slice(2)[0];
+const port = 8082;
 const app = express();
 
 app.use(bodyParser.json());
@@ -42,8 +42,6 @@ app.get('/threats', (req, res) => {
 });
 
 app.post('/assignment', (req, res) => {
-  console.log(req.body);
-  
   request.post({
     headers: { 'content-type': 'application/json' },
     url: `${heroesService}/hero/${req.body.heroId}`,
