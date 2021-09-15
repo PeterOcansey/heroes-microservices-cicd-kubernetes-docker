@@ -9,12 +9,11 @@
         "url": "https://opensource.org/licenses/MIT"
       }
     },
-    "host": "localhost:8082",
     "basePath": "/",
     "tags": [
       {
         "name": "Threats",
-        "description": "API for threats in the system"
+        "description": "API for threats in the world"
       }
     ],
     "schemes": ["http"],
@@ -25,7 +24,7 @@
         "/threats": {
           "get": {
             "tags": ["Threats"],
-            "summary": "Get all threats in system",
+            "summary": "Get all threats in world",
             "responses": {
               "200": {
                 "description": "OK"
