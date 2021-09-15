@@ -152,7 +152,7 @@ jobs:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
   
-  ########### Deploy Heroes & Threats Services #############
+  ########### Deploy Heroes & Threats Services ##############
   deploy-services:
     executor: aws-eks/python3
     steps:
@@ -257,6 +257,9 @@ workflows:
           skip-when-tags-exist: false
           tag: "latest"
           requires: ['build-heroes-service']
+          filters:
+            branches:
+              only: [master]
       - aws-ecr/build-and-push-image:
           name: dockerize-threat-service
           account-url: AWS_ECR_ACCOUNT_URL
@@ -271,6 +274,9 @@ workflows:
           skip-when-tags-exist: false
           tag: "latest"
           requires: ['build-threats-service']
+          filters:
+            branches:
+              only: [master]
       - deploy-eks-infrastructure:
           requires: [dockerize-hero-service, dockerize-threat-service]
       - deploy-services:
