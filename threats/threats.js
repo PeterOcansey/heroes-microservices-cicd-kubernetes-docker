@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const request = require('request');
+const swaggerUi = require('swagger-ui-express');
+swaggerDocument = require('./swagger.json');
 
 const port = 8082; //process.argv.slice(2)[0];
 const app = express();
@@ -40,6 +42,8 @@ app.get('/threats', (req, res) => {
 });
 
 app.post('/assignment', (req, res) => {
+  console.log(req.body);
+  
   request.post({
     headers: { 'content-type': 'application/json' },
     url: `${heroesService}/hero/${req.body.heroId}`,
@@ -59,6 +63,7 @@ app.post('/assignment', (req, res) => {
 });
 
 app.use('/img', express.static(path.join(__dirname, 'img')));
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 console.log(`Threats service listening on port ${port}`);
 app.listen(port);

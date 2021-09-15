@@ -2,19 +2,19 @@
     "swagger": "2.0",
     "info": {
       "version": "1.0.0", 
-      "title": "Capstone Microservices API - Heroes Service",
+      "title": "Capstone Microservices API - Threats Service",
       "description": "Udacity capstone project - Deploy a microservices app using docker, kubernetes, cloudformation and circleci",
       "license": {
         "name": "MIT",
         "url": "https://opensource.org/licenses/MIT"
       }
     },
-    "host": "localhost:8081",
+    "host": "localhost:8082",
     "basePath": "/",
     "tags": [
       {
-        "name": "Heroes",
-        "description": "API for heroes in the system"
+        "name": "Threats",
+        "description": "API for threats in the system"
       }
     ],
     "schemes": ["http"],
@@ -22,10 +22,10 @@
     "produces": ["application/json"],
 
     "paths": {
-        "/heroes": {
+        "/threats": {
           "get": {
-            "tags": ["Heroes"],
-            "summary": "Get all heroes in system",
+            "tags": ["Threats"],
+            "summary": "Get all threats in system",
             "responses": {
               "200": {
                 "description": "OK"
@@ -33,21 +33,35 @@
             }
           }
         },
-        "/powers": {
-            "get": {
-              "tags": ["Powers"],
-              "summary": "Get all heroe powers in system",
-              "responses": {
-                "200": {
-                  "description": "OK"
+        "/assignment": {
+          "post": {
+            "tags": ["Threats"],
+            "description": "Assign a hero to a threat",
+            "parameters": [
+              {
+                "name": "threat",
+                "in": "body",
+                "description": "Hero that we want to assign",
+                "schema": {
+                  "$ref": "#/definitions/Threat"
+                }
+              }
+            ],
+            "produces": ["application/json"],
+            "responses": {
+              "200": {
+                "description": "A hero is assigned to threat",
+                "schema": {
+                  "$ref": "#/definitions/Threat"
                 }
               }
             }
           }
+        }
       }, 
       "definitions": {
-        "Hero": {
-          "required": ["displayName", "id", "powers","busy"],
+        "Threat": {
+          "required": ["heroId", "threatId"],
           "properties": {
             "id": {
               "type": "integer",
@@ -59,39 +73,23 @@
             "displayName": {
               "type": "string"
             },
-            "powers": {
+            "necessaryPowers": {
               "type": "array",
               "items": {
-                "type": "integer"
+                "type": "string"
                 }
               }
             },
             "img": {
               "type": "string"
             },
-            "busy": {
-                "type": "boolean"
+            "assignedHero": {
+                "type": "integer"
               }
-          },
-        "Power": {
-            "required": ["id", "name"],
-            "properties":{
-                "id":{
-                    "type": "integer",
-                    "uniqueItems": true
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        }
+          }
         },
-        "Heroes": {
+        "Threats": {
           "type": "array",
-          "$ref": "#/definitions/Hero"
-        },
-        "Powers": {
-          "type": "array",
-          "$ref": "#/definitions/Power"
+          "$ref": "#/definitions/Threat"
         }
 }
