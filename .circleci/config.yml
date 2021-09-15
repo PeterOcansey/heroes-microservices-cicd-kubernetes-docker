@@ -102,6 +102,7 @@ jobs:
           name: Lint Heroes Service
           command: |
             cd heroes
+            npm i
             npm run lint
 
   ########### Lint Threats Service ###########
@@ -116,6 +117,7 @@ jobs:
           name: Lint Threats Service
           command: |
             cd threats
+            npm i
             npm run lint
   
   ########### Create and Deploy EKS Infrastructure #############
