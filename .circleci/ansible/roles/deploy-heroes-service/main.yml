@@ -1,6 +1,0 @@
----
-
-- name: Deploy Heroes Service
-  shell: |
-    kubectl apply -f heroes-service.yml
-    kubectl apply -f heroes-deployment.yml
