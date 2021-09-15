@@ -1,0 +1,97 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0", 
+      "title": "Capstone Heroes Microservices API",
+      "description": "Udacity capstone project - Deploy a microservices app using docker, kubernetes, cloudformation and circleci",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "Heroes",
+        "description": "API for heroes in the system"
+      }
+    ],
+    "schemes": ["http"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+
+    "paths": {
+        "/heroes": {
+          "get": {
+            "tags": ["Heroes"],
+            "summary": "Get all heroes in system",
+            "responses": {
+              "200": {
+                "description": "OK"
+              }
+            }
+          }
+        },
+        "/powers": {
+            "get": {
+              "tags": ["Powers"],
+              "summary": "Get all heroe powers in system",
+              "responses": {
+                "200": {
+                  "description": "OK"
+                }
+              }
+            }
+          }
+      }, 
+      "definitions": {
+        "Hero": {
+          "required": ["displayName", "id", "powers","busy"],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "uniqueItems": true
+            },
+            "type": {
+              "type": "string"
+            },
+            "displayName": {
+              "type": "string"
+            },
+            "powers": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+                }
+              }
+            },
+            "img": {
+              "type": "string"
+            },
+            "busy": {
+                "type": "boolean"
+              }
+          },
+        "Power": {
+            "required": ["id", "name"],
+            "properties":{
+                "id":{
+                    "type": "integer",
+                    "uniqueItems": true
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+        },
+        "Heroes": {
+          "type": "array",
+          "$ref": "#/definitions/Hero"
+        },
+        "Powers": {
+          "type": "array",
+          "$ref": "#/definitions/Power"
+        }
+}

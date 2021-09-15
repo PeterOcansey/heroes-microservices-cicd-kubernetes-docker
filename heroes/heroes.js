@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+swaggerDocument = require('./swagger.json');
 
 const port = 8081;
 const app = express();
@@ -78,6 +80,7 @@ app.post('/hero/**', (req, res) => {
 });
 
 app.use('/img', express.static(path.join(__dirname, 'img')));
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 console.log(`Heroes service listening on port ${port}`);
 app.listen(port);
