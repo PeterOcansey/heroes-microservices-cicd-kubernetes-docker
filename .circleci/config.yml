@@ -37,7 +37,7 @@ commands:
           name: Destroy eks cluster "<<parameters.stack_to_destroy>>"
           when: on_fail
           command: |
-            aws cloudformation delete-stack --region us-west-2 --stack-name "<<parameters.stack_to_destroy>>"
+            aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "<<parameters.stack_to_destroy>>"
   delete-ecr:
     description: Delete ecr container
     parameters:
@@ -157,6 +157,7 @@ jobs:
           repo_to_delete: heroes
           tag_to_delete: "latest-${CIRCLE_BUILD_NUM}"
   
+  ########### Deploy Heroes & Threats Services #############
   deploy-services:
     executor: aws-eks/python3
     steps:
@@ -203,6 +204,34 @@ jobs:
           repo_to_delete: heroes
           tag_to_delete: "latest"
 
+  
+  ########### Cleanup ##############
+  cleanup:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - aws-cli/setup
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y curl
+      - run:
+          name: Get old stack
+          command: |
+            OLD_STACK=$(curl -H "token: << pipeline.parameters.memstash_token >>" \
+               --request GET https://api.memstash.io/values/capstone_hero_oldstack)
+            if ! [ -z "$OLD_STACK" ]
+            then
+              aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "$OLD_STACK"
+            fi
+      - run:
+          name: Update memestash with new stack
+          command: |
+            curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" \
+              --request PUT --data "<< pipeline.parameters.stack_name >>" \
+                https://api.memstash.io/values/capstone_hero_oldstack
+
 
 workflows:
   default:
@@ -246,4 +275,6 @@ workflows:
           requires: [HeroImage, ThreatImage]
       - deploy-services:
           requires: [deploy-eks-infrastructure]
+      - cleanup:
+          requires: [deploy-services]
 
