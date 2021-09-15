@@ -4,12 +4,12 @@ FROM node:12.18.1
 
 ENV NODE_ENV=production
 
-WORKDIR /app/heroes_service
+WORKDIR /app/threats_service
 
-COPY . /app/heroes_service
+COPY . /app/threats_service
 
 RUN npm install --production
 
-EXPOSE 8081
+EXPOSE 8082
 
-CMD [ "node", "heroes.js" ]
+CMD [ "node", "threats.js" ]
