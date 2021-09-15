@@ -129,7 +129,7 @@ Resources:
               - eks.amazonaws.com
             Action:
             - 'sts:AssumeRole'
-      RoleName: EKSClusterRole
+      RoleName: EKSClusterRole-${ID}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
@@ -157,6 +157,7 @@ Resources:
   CapstoneEKSNodeInstanceRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Ref CLUSTERNAME
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -178,6 +179,7 @@ Resources:
     Type: AWS::EKS::Nodegroup
     Properties:
       ClusterName: !Ref CLUSTERNAME
+      NodegroupName: !Ref CLUSTERNAME
       NodeRole: 
         "Fn::GetAtt": ["CapstoneEKSNodeInstanceRole", "Arn"]
       AmiType: AL2_x86_64
