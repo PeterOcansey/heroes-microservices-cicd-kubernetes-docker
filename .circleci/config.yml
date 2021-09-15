@@ -16,7 +16,7 @@ parameters:
     default: "capstone-eks-${CIRCLE_WORKFLOW_ID:0:7}"
   cluster_name:
     type: string
-    default: EKS
+    default: "EKS-${CIRCLE_WORKFLOW_ID:0:7}"
   default_region:
     type: string
     default: us-west-2
@@ -190,14 +190,19 @@ jobs:
           watch-timeout: 20m
       - run:
           name: Test cluster
-          command: |
-            kubectl get svc
-            kubectl get pods
-            kubectl describe pods
-            kubectl get nodes
-            kubectl get deployment
-            kubectl describe service heroes-service
-            kubectl get services -o wide
+          command: kubectl get svc
+      - run:
+          name: Get pods
+          command: kubectl get pods
+      - run:
+          name: Get Nodes
+          command: kubectl get nodes
+      - run: 
+          name: Get Deployment
+          command: kubectl get deployment
+      - run: 
+          name: Get Deployed Services
+          command: kubectl get services -o wide
       - destroy-eks:
           stack_to_destroy: "<< pipeline.parameters.stack_name >>"
       - delete-ecr:

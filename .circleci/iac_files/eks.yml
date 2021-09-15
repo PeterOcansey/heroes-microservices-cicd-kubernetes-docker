@@ -137,7 +137,7 @@ Resources:
   CapstoneEKSCluster:
     Type: AWS::EKS::Cluster
     Properties:
-      Name: EKS
+      Name: EKS-${ID}
       Version: 1.18
       RoleArn:
         "Fn::GetAtt": ["CapstoneEKSIAMRole", "Arn"]
@@ -174,7 +174,7 @@ Resources:
   CapstoneEKSNodeGroup:
     Type: AWS::EKS::Nodegroup
     Properties:
-      ClusterName: EKS
+      ClusterName: EKS-${ID}
       NodeRole: 
         "Fn::GetAtt": ["CapstoneEKSNodeInstanceRole", "Arn"]
       AmiType: AL2_x86_64

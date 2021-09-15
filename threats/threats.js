@@ -3,7 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const request = require('request');
 const swaggerUi = require('swagger-ui-express');
-swaggerDocument = require('./swagger.json');
+const swaggerDocument = require('./swagger.json');
 
 const port = 8082;
 const app = express();
