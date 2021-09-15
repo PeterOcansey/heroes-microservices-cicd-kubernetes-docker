@@ -238,10 +238,6 @@ workflows:
           repo: threats
           skip-when-tags-exist: false
           tag: "latest"
-      - build-heroes-image:
-          requires: [build-heroes-service]
-      - build-threats-image:
-          requires: [build-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
       - deploy-services:
