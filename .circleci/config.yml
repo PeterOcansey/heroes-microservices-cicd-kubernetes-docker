@@ -178,6 +178,13 @@ jobs:
           show-kubectl-command: true
           watch-rollout-status: true
           watch-timeout: 20m
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: /home/circleci/project/.circleci/kub_deploy_files/threats-service-deployment.yml
+          resource-name: deployment/threats-service
+          show-kubectl-command: true
+          watch-rollout-status: true
+          watch-timeout: 20m
       - run:
           name: Test cluster
           command: |
@@ -198,12 +205,13 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-heroes-service
-      - build-threats-service
-      - lint-heroes-service:
-          requires: [build-heroes-service]
-      - lint-threats-service:
-          requires: [build-threats-service]
+
+      - lint-heroes-service
+      - lint-threats-service
+      - build-heroes-service:
+          requires: [lint-heroes-service]
+      - build-threats-service:
+          requires: [lint-threats-service]
       - aws-ecr/build-and-push-image:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -216,7 +224,20 @@ workflows:
           repo: heroes
           skip-when-tags-exist: false
           tag: "latest"
-          requires: [lint-heroes-service, lint-threats-service]
+          requires: [build-heroes-service]
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          no-output-timeout: 20m
+          path: ./threats
+          region: AWS_REGION
+          repo: threats
+          skip-when-tags-exist: false
+          tag: "latest"
+          requires: [build-threats-service]
       - deploy-eks-infrastructure:
           requires: [aws-ecr/build-and-push-image]
       - deploy-services:
