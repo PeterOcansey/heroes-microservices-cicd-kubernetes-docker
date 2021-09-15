@@ -236,5 +236,5 @@ jobs:
 workflows:
   default:
     jobs:
-      - deploy-eks-infrastructure:
+      - deploy-eks-infrastructure
 
