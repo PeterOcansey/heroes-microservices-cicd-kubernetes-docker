@@ -243,7 +243,7 @@ workflows:
       - build-threats-image:
           requires: [build-threats-service]
       - deploy-eks-infrastructure:
-          requires: [HeroImage, ThreatImage]
+          requires: [aws-ecr/build-and-push-image]
       - deploy-services:
           requires: [deploy-eks-infrastructure]
 
