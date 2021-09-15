@@ -5,7 +5,7 @@ Parameters:
   ID:
     Description: Unique Identifier
     Type: String
-  CLUSTER_NAME:
+  CLUSTERNAME:
     Description: Name of cluster
     Type: String
 
@@ -140,7 +140,7 @@ Resources:
   CapstoneEKSCluster:
     Type: AWS::EKS::Cluster
     Properties:
-      Name: !Ref CLUSTER_NAME
+      Name: !Ref CLUSTERNAME
       Version: 1.18
       RoleArn:
         "Fn::GetAtt": ["CapstoneEKSIAMRole", "Arn"]
@@ -177,7 +177,7 @@ Resources:
   CapstoneEKSNodeGroup:
     Type: AWS::EKS::Nodegroup
     Properties:
-      ClusterName: !Ref CLUSTER_NAME
+      ClusterName: !Ref CLUSTERNAME
       NodeRole: 
         "Fn::GetAtt": ["CapstoneEKSNodeInstanceRole", "Arn"]
       AmiType: AL2_x86_64
