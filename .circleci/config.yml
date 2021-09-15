@@ -227,6 +227,7 @@ workflows:
           repo: heroes
           skip-when-tags-exist: false
           tag: "latest"
+          requires: ['build-heroes-service']
       - aws-ecr/build-and-push-image:
           name: ThreatImage
           account-url: AWS_ECR_ACCOUNT_URL
@@ -240,6 +241,7 @@ workflows:
           repo: threats
           skip-when-tags-exist: false
           tag: "latest"
+          requires: ['build-threats-service']
       - deploy-eks-infrastructure:
           requires: [HeroImage, ThreatImage]
       - deploy-services:
