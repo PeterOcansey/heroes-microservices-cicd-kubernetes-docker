@@ -123,17 +123,12 @@ jobs:
   ########### Create and Deploy EKS Infrastructure #############
   deploy-eks-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - aws-cli/setup
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk update
-            apk add --update zip
       - run:
           name: Deploy EKS cluster
           no_output_timeout: 30m
