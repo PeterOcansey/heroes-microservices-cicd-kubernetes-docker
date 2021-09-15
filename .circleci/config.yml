@@ -249,7 +249,7 @@ workflows:
       - build-threats-service:
           requires: [lint-threats-service]
       - aws-ecr/build-and-push-image:
-          name: HeroImage
+          name: dockerize-hero-service
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
@@ -263,7 +263,7 @@ workflows:
           tag: "latest"
           requires: ['build-heroes-service']
       - aws-ecr/build-and-push-image:
-          name: ThreatImage
+          name: dockerize-threat-service
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
@@ -277,7 +277,7 @@ workflows:
           tag: "latest"
           requires: ['build-threats-service']
       - deploy-eks-infrastructure:
-          requires: [HeroImage, ThreatImage]
+          requires: [dockerize-hero-service, dockerize-threat-service]
       - deploy-services:
           requires: [deploy-eks-infrastructure]
       - cleanup:
