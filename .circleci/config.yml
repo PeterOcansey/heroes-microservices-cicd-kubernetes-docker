@@ -228,7 +228,7 @@ jobs:
       - run:
           name: Update memestash with new stack
           command: |
-            RESPONSE =$(curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" \
+            RESPONSE=$(curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" \
               --request PUT --data "<< pipeline.parameters.stack_name >>" \
                 https://api.memstash.io/values/capstone_hero_oldstack)
             echo $RESPONSE
