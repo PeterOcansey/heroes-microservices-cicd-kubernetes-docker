@@ -129,7 +129,7 @@ Resources:
               - eks.amazonaws.com
             Action:
             - 'sts:AssumeRole'
-      RoleName: EKSClusterRole${ID}
+      RoleName: !Sub 'EKSClusterRole${CLUSTERNAME}'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
