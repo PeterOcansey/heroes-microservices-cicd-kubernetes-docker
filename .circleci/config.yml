@@ -141,7 +141,7 @@ jobs:
             aws cloudformation deploy \
               --stack-name "<< pipeline.parameters.stack_name >>" \
               --template-file .circleci/iac_files/eks.yml \
-              --parameters ID="<< pipeline.parameters.resources_id >>",CLUSTERNAME="<< pipeline.parameters.cluster_name >>" \
+              --parameters ParameterKey=ID,ParameterValue="<< pipeline.parameters.resources_id >>", ParameterKey=CLUSTERNAME,ParameterValue="<< pipeline.parameters.cluster_name >>" \
               --region="<< pipeline.parameters.default_region >>" \
               --capabilities "CAPABILITY_NAMED_IAM"
       - run:
