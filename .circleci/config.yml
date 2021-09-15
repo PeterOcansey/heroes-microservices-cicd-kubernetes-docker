@@ -237,5 +237,50 @@ jobs:
 workflows:
   default:
     jobs:
-      - cleanup
+      - lint-heroes-service
+      - lint-threats-service
+      - build-heroes-service:
+          requires: [lint-heroes-service]
+      - build-threats-service:
+          requires: [lint-threats-service]
+      - aws-ecr/build-and-push-image:
+          name: dockerize-hero-service
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          no-output-timeout: 20m
+          path: ./heroes
+          region: AWS_REGION
+          repo: heroes
+          skip-when-tags-exist: false
+          tag: "latest"
+          requires: ['build-heroes-service']
+          filters:
+            branches:
+              only: [master]
+      - aws-ecr/build-and-push-image:
+          name: dockerize-threat-service
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          no-output-timeout: 20m
+          path: ./threats
+          region: AWS_REGION
+          repo: threats
+          skip-when-tags-exist: false
+          tag: "latest"
+          requires: ['build-threats-service']
+          filters:
+            branches:
+              only: [master]
+      - deploy-eks-infrastructure:
+          requires: [dockerize-hero-service, dockerize-threat-service]
+      - deploy-services:
+          requires: [deploy-eks-infrastructure]
+      - cleanup:
+          requires: [deploy-services]
 
