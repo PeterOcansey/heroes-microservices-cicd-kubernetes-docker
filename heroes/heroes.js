@@ -63,7 +63,7 @@ app.get('/powers', (req, res) => {
 
 app.post('/hero/**', (req, res) => {
   const heroId = parseInt(req.params[0], 10);
-  const foundHero = heroes.find((subject) => subject.id === heroId);
+  const foundHero = heroes.find(subject => subject.id === heroId);
 
   if (foundHero) {
     Object.keys(foundHero).forEach((attribute) => {
