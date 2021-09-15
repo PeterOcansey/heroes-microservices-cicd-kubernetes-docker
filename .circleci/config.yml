@@ -239,7 +239,7 @@ workflows:
           skip-when-tags-exist: false
           tag: "latest"
       - deploy-eks-infrastructure:
-          requires: [aws-ecr/build-and-push-image]
+          requires: [HeroImage, ThreatImage]
       - deploy-services:
           requires: [deploy-eks-infrastructure]
 
