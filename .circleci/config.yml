@@ -222,8 +222,7 @@ jobs:
             OLD_STACK=$(curl -H "token: << pipeline.parameters.memstash_token >>" \
                --request GET https://api.memstash.io/values/capstone_hero_oldstack)
             echo $OLD_STACK
-            if [ ! -z "${OLD_STACK}" ]
-            then
+            if $OLD_STACK | grep "capstone-eks"; then
               aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "${OLD_STACK}"
             fi
       - run:
