@@ -221,65 +221,21 @@ jobs:
           command: |
             OLD_STACK=$(curl -H "token: << pipeline.parameters.memstash_token >>" \
                --request GET https://api.memstash.io/values/capstone_hero_oldstack)
-            if ! [ -z "$OLD_STACK" ]
+            if [ ! -z "${OLD_STACK}" ]
             then
-              aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "$OLD_STACK"
+              aws cloudformation delete-stack --region "<< pipeline.parameters.default_region >>" --stack-name "${OLD_STACK}"
             fi
       - run:
           name: Update memestash with new stack
           command: |
-            curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" \
+            RESPONSE =$(curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" \
               --request PUT --data "<< pipeline.parameters.stack_name >>" \
-                https://api.memstash.io/values/capstone_hero_oldstack
+                https://api.memstash.io/values/capstone_hero_oldstack)
+            echo $RESPONSE
 
 
 workflows:
   default:
     jobs:
-      - lint-heroes-service
-      - lint-threats-service
-      - build-heroes-service:
-          requires: [lint-heroes-service]
-      - build-threats-service:
-          requires: [lint-threats-service]
-      - aws-ecr/build-and-push-image:
-          name: dockerize-hero-service
-          account-url: AWS_ECR_ACCOUNT_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          create-repo: true
-          dockerfile: Dockerfile
-          no-output-timeout: 20m
-          path: ./heroes
-          region: AWS_REGION
-          repo: heroes
-          skip-when-tags-exist: false
-          tag: "latest"
-          requires: ['build-heroes-service']
-          filters:
-            branches:
-              only: [master]
-      - aws-ecr/build-and-push-image:
-          name: dockerize-threat-service
-          account-url: AWS_ECR_ACCOUNT_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          create-repo: true
-          dockerfile: Dockerfile
-          no-output-timeout: 20m
-          path: ./threats
-          region: AWS_REGION
-          repo: threats
-          skip-when-tags-exist: false
-          tag: "latest"
-          requires: ['build-threats-service']
-          filters:
-            branches:
-              only: [master]
-      - deploy-eks-infrastructure:
-          requires: [dockerize-hero-service, dockerize-threat-service]
-      - deploy-services:
-          requires: [deploy-eks-infrastructure]
-      - cleanup:
-          requires: [deploy-services]
+      - cleanup
 
